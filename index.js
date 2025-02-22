@@ -9,7 +9,7 @@ const term = terminal.terminal;
 
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ 
+const model = genAI.getGenerativeModel({
 	model: "gemini-2.0-flash-exp"
 });
 const prompt = "Solve any git merge conflicts in the file below. Only respond with the final file contents, but do not use markdown code blocks.";
@@ -38,10 +38,10 @@ const data = {
 	}
 }
 
-let spinner = await term.spinner("dotSpinner");
-term.green(" Generating...")
+term.green("Generating ")
+let spinner = await term.spinner("impulse");
 
-const result = await model.generateContent([prompt,data]);
+const result = await model.generateContent([prompt, data]);
 const text = result.response.text();
 spinner.animate(false);
 term.eraseLine();
@@ -57,14 +57,14 @@ diffLines(originalText.toString('utf-8'), text).forEach(part => {
 // term(result.response.text());
 
 term('\n\nWould you like to overwrite the file? (Y/n) ');
-term.yesOrNo( { yes: [ 'y' , 'ENTER' ] , no: [ 'n' ] } , function( error , result ) {
+term.yesOrNo({ yes: ['y', 'ENTER'], no: ['n'] }, function (error, result) {
 	if (result || process.argv.includes("-y")) {
 		fs.writeFileSync(file, Buffer.from(text, "base64").toString("utf-8"));
 		term.green("\nFile saved successfully.");
 		term.processExit(0);
 	}
 	else {
-		term.red("\nFile not saved." );
+		term.red("\nFile not saved.");
 		term.processExit(0);
 	}
 });
