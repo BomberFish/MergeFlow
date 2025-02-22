@@ -12,7 +12,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({
 	model: "gemini-2.0-flash-exp"
 });
-const prompt = "Solve any git merge conflicts in the file below. Only respond with the final file contents, but do not use markdown code blocks.";
+const prompt = "Solve any git merge conflicts in the file below. Only respond with the final file contents, but do not use markdown code blocks. Ensure that the file is in a valid state after the merge.";
 
 const file = process.argv[0].includes("node") ? process.argv[2] : process.argv[1];
 
