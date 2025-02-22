@@ -12,6 +12,7 @@ const model = genAI.getGenerativeModel({
 const prompt = "Solve any git merge conflicts in the file below. Only respond with the final file contents, but do not use markdown code blocks.";
 
 const file = process.argv[2];
+
 const data = {
 	inlineData: {
 		data: Buffer.from(fs.readFileSync(file)).toString("base64"),
@@ -29,3 +30,7 @@ term.eraseLine();
 let cursorLocation = await term.getCursorLocation();
 term.moveTo(1, cursorLocation.y);
 term(result.response.text());
+
+fs.writeFileSync(file, Buffer.from(result.response.text(), "base64").toString("utf-8"));
+term.green("\nFile saved successfully.\n");
+term.processExit(0);
