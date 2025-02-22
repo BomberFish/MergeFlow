@@ -1,7 +1,7 @@
 {
   "name": "mergeflow",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.9.0",
+  "description": "Smart Git merge conflict resolution, powered by Gemini",
   "type": "module",
   "main": "index.js",
   "scripts": {
