@@ -1,9 +1,12 @@
+// TODO: Operate on whole codebase instead of just one file
+
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import "dotenv/config"
 import fs from "fs";
-
 import terminal from "terminal-kit";
+import { diffLines } from "diff";
 const term = terminal.terminal;
+
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ 
@@ -27,9 +30,10 @@ if (file == "-h" || file == "--help") {
 	process.exit(1);
 }
 
+const originalText = fs.readFileSync(file)
 const data = {
 	inlineData: {
-		data: Buffer.from(fs.readFileSync(file)).toString("base64"),
+		data: Buffer.from(originalText).toString("base64"),
 		mimeType: "text/plain",
 	}
 }
@@ -38,13 +42,30 @@ let spinner = await term.spinner("dotSpinner");
 term.green(" Generating...")
 
 const result = await model.generateContent([prompt,data]);
+const text = result.response.text();
 spinner.animate(false);
 term.eraseLine();
 
 let cursorLocation = await term.getCursorLocation();
 term.moveTo(1, cursorLocation.y);
-term(result.response.text());
 
-fs.writeFileSync(file, Buffer.from(result.response.text(), "base64").toString("utf-8"));
-term.green("\nFile saved successfully.");
-term.processExit(0);
+diffLines(originalText.toString('utf-8'), text).forEach(part => {
+	let color = part.added ? 'green' : part.removed ? 'red' : 'grey';
+	term[color](part.added ? "+" : part.removed ? "-" : " ", part.value + "\n");
+});
+
+// term(result.response.text());
+
+term('\n\nWould you like to overwrite the file? (Y/n) ');
+term.yesOrNo( { yes: [ 'y' , 'ENTER' ] , no: [ 'n' ] } , function( error , result ) {
+	if (result || process.argv.includes("-y")) {
+		fs.writeFileSync(file, Buffer.from(text, "base64").toString("utf-8"));
+		term.green("\nFile saved successfully.");
+		term.processExit(0);
+	}
+	else {
+		term.red("\nFile not saved." );
+		term.processExit(0);
+	}
+});
+
