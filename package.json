@@ -1,0 +1,19 @@
+{
+  "name": "mergeflow",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.22.0",
+    "dotenv": "^16.4.7",
+    "terminal-kit": "^3.1.2"
+  }
+}
