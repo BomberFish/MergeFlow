@@ -11,7 +11,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({
 	model: "gemini-2.0-flash-exp"
 });
-const prompt = "Solve any git merge conflicts in the file below, and try to use the better options for code. Only respond with the final file contents, but do not use markdown code blocks. Ensure that the file is in a valid state after the merge.";
+var prompt = "Solve any git merge conflicts in the file below, and try to use the better options for code. Only respond with the final file contents, but do not use markdown code blocks. Ensure that the file is in a valid state after the merge.";
 
 if (process.argv.includes("--document") || process.argv.includes("-d")) {
 	prompt += " Add accurate and concise documentation through the form of comments. Use a similar naming scheme to existing comments and code.";
