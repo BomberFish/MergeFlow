@@ -92,22 +92,29 @@ async function merge(file) {
 	});
 }
 
-term("\n\nWould you like to");
-term.green(' commit ');
-term('the changes? (Y/n) ');
+// Replace the final commit section with:
+term.cyan('\n╭─ Commit Changes\n');
+term.cyan('├ ').white('Message: ').green('Automated merge conflict resolution\n');
+term.cyan('├ ').white('Author: ').green('MergeFlow\n');
+term.cyan('├ ').white('Press ').cyan('[Y]').white(' to commit, ').cyan('[N]').white(' to skip\n');
+term.cyan('╰─ ');
+
 term.yesOrNo({ yes: ['y', 'ENTER'], no: ['n'] }, function (error, result) {
-	if (result || process.argv.includes("-y")) {
-		exec("git add . && git commit --author='MergeFlow <>' -m 'Automated merge conflict resolution'", (err, stdout, stderr) => {
-			if (err) {
-				term.red("An error occurred while committing the changes.")
-				term.processExit(1);
-			}
-			term.green("Changes committed successfully.");
-			term.processExit(0);
-		});
-	}
-	else {
-		term.red("Changes not committed.");
-		term.processExit(0);
-	}
-}); 
+    if (result || process.argv.includes("-y")) {
+        term.cyan('\n╭─ Committing changes...');
+        exec("git add . && git commit --author='MergeFlow <>' -m 'Automated merge conflict resolution'", (err, stdout, stderr) => {
+            if (err) {
+                term.red("\n├─ ✗ Error: Failed to commit changes");
+                term.red("\n╰─ " + err.message + "\n");
+                term.processExit(1);
+            }
+            term.green("\n├─ ✓ Changes staged");
+            term.green("\n╰─ ✓ Commit successful\n");
+            term.processExit(0);
+        });
+    }
+    else {
+        term.yellow("\n╰─ ○ Commit skipped\n");
+        term.processExit(0);
+    }
+});
