@@ -11,7 +11,11 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({
 	model: "gemini-2.0-flash-exp"
 });
-const prompt = "Solve any git merge conflicts in the file below. Only respond with the final file contents, but do not use markdown code blocks. Ensure that the file is in a valid state after the merge.";
+const prompt = "Solve any git merge conflicts in the file below, and try to use the better options for code. Only respond with the final file contents, but do not use markdown code blocks. Ensure that the file is in a valid state after the merge.";
+
+if (process.argv.includes("--document") || process.argv.includes("-d")) {
+	prompt += " Add accurate and concise documentation through the form of comments. Use a similar naming scheme to existing comments and code.";
+}
 
 if (!fs.existsSync(".git")) {
 	term.red("Not a git repository.");
@@ -33,7 +37,7 @@ if (files.length == 0) {
 }
 
 // Add initial check for quiet mode
-const isQuietMode = process.argv.includes("--quiet");
+const isQuietMode = process.argv.includes("--quiet") || process.argv.includes("-q");
 if (isQuietMode) {
     term.green("Running in quiet mode - changes will be applied automatically\n");
 }
@@ -81,7 +85,7 @@ async function merge(file) {
 	term.cyan('╰─ ');
 
 	term.yesOrNo({ yes: ['y', 'ENTER'], no: ['n'] }, function (error, result) {
-		if (result || process.argv.includes("--quiet")) {
+		if (result || isQuietMode) {
 			fs.writeFileSync(file, Buffer.from(text, "utf-8"));
 			term.green("\n✓ Changes saved successfully\n");
 			term.processExit(0);
