@@ -1,4 +1,6 @@
-// nya!
+#!/usr/bin/env node
+
+// nya!~ :3
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import "dotenv/config"
 import fs from "fs";
