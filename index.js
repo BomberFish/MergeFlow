@@ -14,7 +14,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({
 	model: "gemini-2.0-flash-exp"
 });
-var prompt = "Solve any git merge conflicts in the file below, and try to use the better options for code. Only respond with the final file contents, but do not use markdown code blocks. Ensure that the file is in a valid state after the merge.";
+let prompt = "Solve any git merge conflicts in the file below, and try to use the better options for code. Only respond with the final file contents, but do not use markdown code blocks. Ensure that the file is in a valid state after the merge.";
 
 // Documentation
 if (process.argv.includes("--document") || process.argv.includes("-d")) {
@@ -26,6 +26,12 @@ if (!fs.existsSync(".git")) {
 	term.red("Not a git repository.");
 	term.processExit(1);
 	process.exit(1);
+}
+// check for the help flag	
+if (process.argv.includes("--help") || process.argv.includes("-h")) {
+	term.white("Usage: mergeflow <file> [--document] [--quiet] [--help]");
+	term.processExit(0);
+	process.exit(0);
 }
 
 // Check for unmerged files
@@ -43,11 +49,7 @@ if (files.length == 0) {
 	});
 }
 
-if (process.argv.includes("--help") || process.argv.includes("-h")) {
-	term.white("Usage: mergeflow <file> [--document] [--quiet] [--help]");
-	term.processExit(0);
-	process.exit(0);
-}
+
 
 // Quiet mode
 const isQuietMode = process.argv.includes("--quiet") || process.argv.includes("-q");
