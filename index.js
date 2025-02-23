@@ -32,6 +32,11 @@ if (files.length == 0) {
 	});
 }
 
+// Add initial check for quiet mode
+const isQuietMode = process.argv.includes("--quiet");
+if (isQuietMode) {
+    term.green("Running in quiet mode - changes will be applied automatically\n");
+}
 
 async function merge(file) {
 	const originalText = fs.readFileSync(file)
@@ -42,39 +47,46 @@ async function merge(file) {
 		}
 	}
 
+	// Create a frame for the progress
+	term.clear();
+	term.moveTo(1, 1);
+	term.cyan('╭─ MergeFlow ').green('resolving conflicts\n');
+	term.cyan('├ File: ').white(file + '\n');
+	term.cyan('╰─');
+
 	let spinner = await term.spinner("dotSpinner");
-	term.green(` Resolving ${file.split("/").at(-1)}`);
 
 	const result = await model.generateContent([prompt, data]);
 	const text = result.response.text();
 	spinner.animate(false);
 
-	async function eraseLine() {
-		term.eraseLine();
-		let cursorLocation = await term.getCursorLocation();
-		term.moveTo(1, cursorLocation.y);
-	}
+	// Clear the spinner line
+	term.previousLine(1);
+	term.eraseLine();
+	term.cyan('╰─ ').green('✓ Resolution complete\n\n');
 
-	await eraseLine();
-	term('✓');
-	term.green(` Successfully resolved ${file.split("/").at(-1)}.\n`);
-
+	// Show diff with improved formatting
+	term.cyan('Changes:\n');
+	term.cyan('╭─────────────────────────────\n');
 	diffLines(originalText.toString('utf-8'), text).forEach(part => {
-		let color = part.added ? 'green' : part.removed ? 'red' : 'grey';
-		term[color](part.added ? "+" : part.removed ? "-" : " ", part.value + "\n");
+		let prefix = part.added ? '+ ' : part.removed ? '- ' : '  ';
+		let color = part.added ? 'green' : part.removed ? 'red' : 'white';
+		term[color](prefix + part.value);
 	});
+	term.cyan('╰─────────────────────────────\n\n');
 
-	// term(result.response.text());
+	// Improved confirmation dialog
+	term.cyan('╭─ Confirm changes\n');
+	term.cyan('├ ').white('Press ').cyan('[Y]').white(' to save, ').cyan('[N]').white(' to discard\n');
+	term.cyan('╰─ ');
 
-	term('\n\nWould you like to overwrite the file? (Y/n) ');
 	term.yesOrNo({ yes: ['y', 'ENTER'], no: ['n'] }, function (error, result) {
-		if (result || process.argv.includes("-y")) {
+		if (result || process.argv.includes("--quiet")) {
 			fs.writeFileSync(file, Buffer.from(text, "utf-8"));
-			term.green("\nFile saved successfully.");
+			term.green("\n✓ Changes saved successfully\n");
 			term.processExit(0);
-		}
-		else {
-			term.red("\nFile not saved.");
+		} else {
+			term.red("\n✗ Changes discarded\n");
 			term.processExit(0);
 		}
 	});
