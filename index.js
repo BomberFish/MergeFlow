@@ -16,7 +16,7 @@ var prompt = "Solve any git merge conflicts in the file below, and try to use th
 
 // Documentation
 if (process.argv.includes("--document") || process.argv.includes("-d")) {
-	prompt += "Add accurate and concise documentation through the form of comments. Use a similar naming scheme to existing comments and code.";
+	prompt += " Add accurate and concise documentation through the form of comments. Use a similar naming scheme to existing comments and code.";
 }
 
 // Check whether we're in a git repo
@@ -39,6 +39,12 @@ if (files.length == 0) {
 	files.forEach(file => {
 		merge(file);
 	});
+}
+
+if (process.argv.includes("--help") || process.argv.includes("-h")) {
+	term.white("Usage: mergeflow <file> [--document] [--quiet] [--help]");
+	term.processExit(0);
+	process.exit(0);
 }
 
 // Quiet mode
