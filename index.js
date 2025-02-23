@@ -79,5 +79,3 @@ async function merge(file) {
 		}
 	});
 }
-
-// merge(file);
