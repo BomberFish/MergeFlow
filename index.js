@@ -1,8 +1,7 @@
-// TODO: Operate on whole codebase instead of just one file
-
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import "dotenv/config"
 import fs from "fs";
+import { exec, execSync } from "child_process";
 import terminal from "terminal-kit";
 import { diffLines } from "diff";
 const term = terminal.terminal;
@@ -14,21 +13,25 @@ const model = genAI.getGenerativeModel({
 });
 const prompt = "Solve any git merge conflicts in the file below. Only respond with the final file contents, but do not use markdown code blocks. Ensure that the file is in a valid state after the merge.";
 
-const file = process.argv[0].includes("node") ? process.argv[2] : process.argv[1];
-
-if (file == "-h" || file == "--help") {
-	term("Usage: mergeflow index.js <file>\n");
-	term.processExit(0);
-	process.exit(0);
-} if (!file) {
-	term.red("Please provide a file to generate content from.");
-	term.processExit(1);
-	process.exit(1);
-} else if (!fs.existsSync(file)) {
-	term.red("File does not exist.");
+if (!fs.existsSync(".git")) {
+	term.red("Not a git repository.");
 	term.processExit(1);
 	process.exit(1);
 }
+
+const status = execSync("git status --porcelain").toString();
+const files = status.split("\n").filter(line => line.includes("U")).map(line => line.split(" ")[1]);
+
+if (files.length == 0) {
+	term.green("No merge conflicts found. Awesome!");
+	term.processExit(0);
+	process.exit(0);
+} else {
+	files.forEach(file => {
+		merge(file);
+	});
+}
+
 
 async function merge(file) {
 	const originalText = fs.readFileSync(file)
@@ -77,4 +80,4 @@ async function merge(file) {
 	});
 }
 
-merge(file);
+// merge(file);
